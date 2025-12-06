@@ -18,13 +18,26 @@ public class CardManager : MonoBehaviour
     private Sprite currentSprite;
     private SpriteRenderer frontSR;
     private Image frontIMG;
+    public GameObject endGamePanel;
+    public Button btnNext1;
+    public Button btnNext2;
+
+    public Text txtP1Name, txtP2Name, txtP1Score, txtP2Score;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+         if (endGamePanel != null)
+            endGamePanel.SetActive(false);
+
         frontSR = front.GetComponent<SpriteRenderer>();
         frontIMG = front.GetComponent<Image>();
         front.SetActive(true);
         back.SetActive(false);
+        if (buttonNext1Text != null)
+            buttonNext1Text.text = GameManager.instance.player1Name;
+
+        if (buttonNext2Text != null)
+            buttonNext2Text.text = GameManager.instance.player2Name;
         LoadAllSprites();
         PeekRandomSprite();
     }
@@ -50,7 +63,7 @@ public class CardManager : MonoBehaviour
         if (spritePool.Count == 0)
         {
             // nếu không còn thẻ, show EndGame
-            // ShowEndGamePanel();
+            ShowEndGamePanel();
             return;
         }
 
@@ -69,7 +82,7 @@ public class CardManager : MonoBehaviour
     {
         if (spritePool.Count == 0)
         {
-            // ShowEndGamePanel();
+            ShowEndGamePanel();
             return;
         }
 
@@ -89,7 +102,7 @@ public class CardManager : MonoBehaviour
         if (spritePool.Count == 0)
         {
             // gọi ShowEndGamePanel() ở đây nếu muốn hiện ngay khi rút hết.
-            // ShowEndGamePanel();
+            ShowEndGamePanel();
         }
     }
     void ResetToFront()
@@ -112,7 +125,7 @@ public class CardManager : MonoBehaviour
         ResetToFront();
         LoadRandomSpriteAndConsume();
 
-        // gamemanager.instance.AddPlayer1Score();
+        GameManager.instance.AddPlayer1Score();
     }
 
     // Player 2 (consume + add score)
@@ -123,7 +136,47 @@ public class CardManager : MonoBehaviour
         ResetToFront();
         LoadRandomSpriteAndConsume();
 
-        // gamemanager.instance.AddPlayer2Score();
+        GameManager.instance.AddPlayer2Score();
+    }
+    public void ShowEndGamePanel()
+    {
+        if (endGamePanel == null) return;
+
+        endGamePanel.SetActive(true);
+
+        // ❌ khóa nút để không bấm được nữa
+        if (btnNext1 != null) btnNext1.interactable = false;
+        if (btnNext2 != null) btnNext2.interactable = false;
+
+        txtP1Name.text  = GameManager.instance.player1Name;
+        txtP2Name.text  = GameManager.instance.player2Name;
+
+        txtP1Score.text = GameManager.instance.GetPlayer1Score().ToString();
+        txtP2Score.text = GameManager.instance.GetPlayer2Score().ToString();
+
+        Debug.Log("Hiện panel End Game");
+    }
+    public void ExitGame()
+    {
+        ShowEndGamePanel();
+    }
+
+     // ⭐⭐⭐ NEW: BUTTON RESTART
+    public void RestartGame()
+    {
+        PlayerPrefs.SetInt(GameManager.PLAYER1_SCORE_KEY, 0);
+        PlayerPrefs.SetInt(GameManager.PLAYER2_SCORE_KEY, 0);
+
+        SceneManager.LoadScene("GamePlay");
+    }
+
+    // ⭐⭐⭐ NEW: BUTTON MENU
+    public void GoToMenu()
+    {
+        PlayerPrefs.SetInt(GameManager.PLAYER1_SCORE_KEY, 0);
+        PlayerPrefs.SetInt(GameManager.PLAYER2_SCORE_KEY, 0);
+        
+        SceneManager.LoadScene("Menu");
     }
     // Update is called once per frame
     void Update()
